@@ -34,17 +34,17 @@ privateKeys=()
 proxies=()
 
 echo "Please enter wallet addresses (one per line) and press Ctrl+D when done:"
-while read -r line; do
+while IFS= read -r line; do
   addresses+=("$line")
 done
 
 echo "Please enter private keys (one per line) corresponding to the addresses and press Ctrl+D when done:"
-while read -r line; do
+while IFS= read -r line; do
   privateKeys+=("$line")
 done
 
 echo "Please enter proxies (one per line) corresponding to the addresses (optional, press Enter to skip) and press Ctrl+D when done:"
-while read -r line; do
+while IFS= read -r line; do
   proxies+=("$line")
 done
 
