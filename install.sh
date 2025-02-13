@@ -28,98 +28,39 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 nvm install 18.20.5
 nvm use 18.20.5
 
-# 创建 setup.js 脚本
-cat << 'EOF' > setup.js
-const fs = require('fs');
-const readline = require('readline');
-const { exec } = require('child_process');
-
-// 创建 readline 接口
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  terminal: true
-});
-
-let addresses = [];
-let privateKeys = [];
-let proxies = [];
-
-// 提示用户输入地址
-function promptAddresses() {
-  console.log('Please enter wallet addresses (one per line) and press Ctrl+D when done:');
-  rl.on('line', (line) => {
-    addresses.push(line.trim());
-  });
-
-  rl.on('close', () => {
-    promptPrivateKeys();
-  });
-}
-
-// 提示用户输入私钥
-function promptPrivateKeys() {
-  rl.resume();
-  rl.question('Please enter private keys (one per line) corresponding to the addresses and press Ctrl+D when done:\n', (line) => {
-    privateKeys.push(line.trim());
-  });
-
-  rl.on('close', () => {
-    promptProxies();
-  });
-}
-
-// 提示用户输入代理信息
-function promptProxies() {
-  rl.resume();
-  rl.question('Please enter proxies (one per line) corresponding to the addresses (optional, press Enter to skip) and press Ctrl+D when done:\n', (line) => {
-    proxies.push(line.trim());
-  });
-
-  rl.on('close', () => {
-    saveAccounts();
-  });
-}
-
-// 保存账户信息到 accounts.json 文件
-function saveAccounts() {
-  let accounts = [];
-  for (let i = 0; i < addresses.length; i++) {
-    accounts.push({
-      address: addresses[i],
-      privateKey: privateKeys[i] || '',
-      proxy: proxies[i] || ''
-    });
-  }
-
-  const jsonContent = JSON.stringify(accounts, null, 2);
-  fs.writeFile('accounts.json', jsonContent, 'utf8', (err) => {
-    if (err) {
-      console.error('An error occurred while writing JSON Object to File.', err);
-      process.exit(1);
-    }
-
-    console.log('accounts.json has been saved.');
-    startScreenSession();
-  });
-}
-
-// 启动新的 screen 会话并运行脚本
-function startScreenSession() {
-  const screenName = 'gokiteai-bot';
-  const command = `screen -dmS ${screenName} bash -c 'nvm use 18.20.5 && npm install && node .'`;
-
-  exec(command, (err, stdout, stderr) => {
-    if (err) {
-      console.error(`Error starting screen session: ${err}`);
-      return;
-    }
-    console.log(`Screen session '${screenName}' started.`);
-  });
-}
-
-promptAddresses();
-EOF
-
 # 提示用户输入账户信息
-node setup.js
+addresses=()
+privateKeys=()
+proxies=()
+
+echo "Please enter wallet addresses (one per line) and press Ctrl+D when done:"
+while read -r line; do
+  addresses+=("$line")
+done
+
+echo "Please enter private keys (one per line) corresponding to the addresses and press Ctrl+D when done:"
+while read -r line; do
+  privateKeys+=("$line")
+done
+
+echo "Please enter proxies (one per line) corresponding to the addresses (optional, press Enter to skip) and press Ctrl+D when done:"
+while read -r line; do
+  proxies+=("$line")
+done
+
+# 保存账户信息到 accounts.json 文件
+accounts=()
+for ((i=0; i<${#addresses[@]}; i++)); do
+  accounts+=("{\"address\": \"${addresses[i]}\", \"privateKey\": \"${privateKeys[i]:-}\", \"proxy\": \"${proxies[i]:-}\"}")
+done
+accounts_json=$(printf ",\n" "${accounts[@]}")
+accounts_json="[${accounts_json:1}]"
+
+echo -e "$accounts_json" > accounts.json
+echo "accounts.json has been saved."
+
+# 启动新的 screen 会话并运行脚本
+screen_name="gokiteai-bot"
+screen -dmS "$screen_name" bash -c 'nvm use 18.20.5 && npm install && node .'
+
+echo "Screen session '$screen_name' started."
