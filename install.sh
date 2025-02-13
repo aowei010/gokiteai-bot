@@ -20,6 +20,10 @@ if ! command -v nvm &> /dev/null; then
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 fi
 
+# 重新加载 nvm
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
 # 安装指定版本的 Node.js
 nvm install 18.20.5
 nvm use 18.20.5
@@ -31,7 +35,7 @@ const readline = require('readline');
 const { exec } = require('child_process');
 
 // 创建 readline 接口
-let rl = readline.createInterface({
+const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   terminal: true
@@ -55,14 +59,8 @@ function promptAddresses() {
 
 // 提示用户输入私钥
 function promptPrivateKeys() {
-  rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    terminal: true
-  });
-
-  console.log('Please enter private keys (one per line) corresponding to the addresses and press Ctrl+D when done:');
-  rl.on('line', (line) => {
+  rl.resume();
+  rl.question('Please enter private keys (one per line) corresponding to the addresses and press Ctrl+D when done:\n', (line) => {
     privateKeys.push(line.trim());
   });
 
@@ -73,14 +71,8 @@ function promptPrivateKeys() {
 
 // 提示用户输入代理信息
 function promptProxies() {
-  rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    terminal: true
-  });
-
-  console.log('Please enter proxies (one per line) corresponding to the addresses (optional, press Enter to skip) and press Ctrl+D when done:');
-  rl.on('line', (line) => {
+  rl.resume();
+  rl.question('Please enter proxies (one per line) corresponding to the addresses (optional, press Enter to skip) and press Ctrl+D when done:\n', (line) => {
     proxies.push(line.trim());
   });
 
