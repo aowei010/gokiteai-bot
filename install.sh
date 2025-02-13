@@ -129,5 +129,5 @@ function startScreenSession() {
 promptAddresses();
 EOF
 
-# 运行 setup.js 脚本
+# 提示用户输入账户信息
 node setup.js
