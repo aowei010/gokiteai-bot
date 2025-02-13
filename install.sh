@@ -28,39 +28,5 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 nvm install 18.20.5
 nvm use 18.20.5
 
-# 提示用户输入账户信息
-addresses=()
-privateKeys=()
-proxies=()
-
-echo "Please enter wallet addresses (one per line) and press Ctrl+D when done:"
-while IFS= read -r line; do
-  addresses+=("$line")
-done
-
-echo "Please enter private keys (one per line) corresponding to the addresses and press Ctrl+D when done:"
-while IFS= read -r line; do
-  privateKeys+=("$line")
-done
-
-echo "Please enter proxies (one per line) corresponding to the addresses (optional, press Enter to skip) and press Ctrl+D when done:"
-while IFS= read -r line; do
-  proxies+=("$line")
-done
-
-# 保存账户信息到 accounts.json 文件
-accounts=()
-for ((i=0; i<${#addresses[@]}; i++)); do
-  accounts+=("{\"address\": \"${addresses[i]}\", \"privateKey\": \"${privateKeys[i]:-}\", \"proxy\": \"${proxies[i]:-}\"}")
-done
-accounts_json=$(printf ",\n" "${accounts[@]}")
-accounts_json="[${accounts_json:1}]"
-
-echo -e "$accounts_json" > accounts.json
-echo "accounts.json has been saved."
-
-# 启动新的 screen 会话并运行脚本
-screen_name="gokiteai-bot"
-screen -dmS "$screen_name" bash -c 'nvm use 18.20.5 && npm install && node .'
-
-echo "Screen session '$screen_name' started."
+# 提示用户运行输入脚本
+echo "请运行 'bash input.sh' 以输入账户信息。"
